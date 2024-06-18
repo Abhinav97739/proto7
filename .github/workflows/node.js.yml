@@ -19,6 +19,15 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Create arti
+        run: tar -czf build.tar.gz -C build
+
+      - name: Upload build arti
+        uses: actions/upload-artifact@v2
+        with:
+          name: build-arti
+          path: build.tar.gz
+
       - name: Copy files to EC2
         uses: appleboy/scp-action@master
         with:
