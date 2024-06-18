@@ -19,6 +19,16 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: List build directory contents
+        run: ls -la build
+      
+      - name: Ensure build directory is not empty
+        run: |
+          if [ -z "$(ls -A build)" ]; then
+            echo "Build directory is empty. Exiting."
+            exit 1
+          fi
+
       - name: Create arti
         run: tar -czf build.tar.gz -C build
 
