@@ -19,27 +19,20 @@ jobs:
       - name: Build the React app
         run: npm run build
 
-      - name: Upload production-ready build files
-        uses: actions/upload-artifact@v2
+      - name: Copy Files to EC2
+        uses: appleboy/scp-action@master
         with:
-          name: build
-          path: build/
+          host: 13.233.149.230
+          username: ubuntu
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "build/"
+          target: "/var/www/html/react"
 
-      - name: Download build files
-        uses: actions/download-artifact@v2
+      - name: SSH to EC2 and server restart
+        uses: appleboy/scp-action@master
         with:
-          name: build
-          path: build/
-
-      - name: Deploy to EC2
-        env:
-          EC2_HOST: ${{ secrets.EC2_HOST }}
-          EC2_USER: ${{ secrets.EC2_USER }}
-          EC2_KEY: ${{ secrets.EC2_SSH_KEY }}
-        run: |
-          mkdir -p ~/.ssh
-          echo "$EC2_KEY" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan $EC2_HOST >> ~/.ssh/known_hosts
-          scp -r build/* $EC2_USER@$EC2_HOST:/var/www/html/
-
+          host: 13.233.149.230
+          username: ubuntu
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            sudo systemctl restart nginx
